@@ -115,15 +115,13 @@ namespace Kamek.Commands
             else
                 Value.AssertValue();
 
-            switch (ValueType)
+            return ValueType switch
             {
-                case Type.Value8: return string.Format("0x{0:X8}:byte:0x000000{1:X2}", Address.Value, Value.Value);
-                case Type.Value16: return string.Format("0x{0:X8}:word:0x0000{1:X4}", Address.Value, Value.Value);
-                case Type.Value32:
-                case Type.Pointer: return string.Format("0x{0:X8}:dword:0x{1:X8}", Address.Value, Value.Value);
-                default:
-                    return null;
-            }
+                Type.Value8 => string.Format("0x{0:X8}:byte:0x000000{1:X2}", Address.Value, Value.Value),
+                Type.Value16 => string.Format("0x{0:X8}:word:0x0000{1:X4}", Address.Value, Value.Value),
+                Type.Value32 or Type.Pointer => string.Format("0x{0:X8}:dword:0x{1:X8}", Address.Value, Value.Value),
+                _ => null,
+            };
         }
 
         public override IEnumerable<ulong> PackGeckoCodes()
