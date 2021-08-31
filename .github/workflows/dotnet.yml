@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build-win:
 
     runs-on: windows-latest
 
@@ -21,20 +21,30 @@ jobs:
         nuget restore
         msbuild -p:Configuration=Release
         cd bin\Release\net5.0
-        7z a "${{ github.workspace }}\Kamek.zip" Kamek.exe Kamek.dll Kamek.runtimeconfig.json
+        7z a "${{ github.workspace }}\Kamek-win.zip" Kamek.exe Kamek.dll Kamek.runtimeconfig.json
         popd
-    - if: github.ref != 'refs/heads/master'
-      uses: actions/upload-artifact@v2.2.3
+    - uses: actions/upload-artifact@v2.2.3
       with:
-        name: Build
+        name: Win-Build
         path: |
           *.zip
-    - if: github.ref == 'refs/heads/master'
-      uses: "marvinpinto/action-automatic-releases@latest"
+          
+  build-mac:  
+    
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - shell: bash
+      run: |
+        pushd ${{ github.workspace }}
+        cd Kamek  
+        dotnet build /p:Configuration=Release
+        cd bin\Release\net5.0
+        7z a "${{ github.workspace }}\Kamek-mac.zip" Kamek Kamek.dll Kamek.runtimeconfig.json
+        popd
+    - uses: actions/upload-artifact@v2.2.3
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "Auto"
-        prerelease: true
-        title: "Auto Build"
-        files: |
+        name: Mac-Build
+        path: |
           *.zip
