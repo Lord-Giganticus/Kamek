@@ -41,10 +41,9 @@ jobs:
         cd Kamek  
         dotnet build /p:Configuration=Release
         cd bin/Release/net5.0
-        7z a "${{ github.workspace }}/Kamek-mac.zip" Kamek Kamek.dll Kamek.runtimeconfig.json
         popd
     - uses: actions/upload-artifact@v2.2.3
       with:
         name: Mac-Build
         path: |
-          *.zip
+          ${{ github.workspace }}/Kamek/bin/Release/net5.0
