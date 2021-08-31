@@ -1,0 +1,40 @@
+name: .NET
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: microsoft/setup-msbuild@v1.0.2
+    - shell: cmd
+      run: |
+        pushd ${{ github.workspace }}
+        cd Kamek
+        nuget restore
+        msbuild -p:Configuration=Release
+        cd bin\Release\net5.0
+        7z a "${{ github.workspace }}\Kamek.zip" Kamek.exe Kamek.dll Kamek.runtimeconfig.json
+        popd
+    - if: github.ref != 'refs/heads/master'
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: Build
+        path: |
+          *.zip
+    - if: github.ref == 'refs/heads/master'
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "Auto"
+        prerelease: true
+        title: "Auto Build"
+        files: |
+          *.zip
