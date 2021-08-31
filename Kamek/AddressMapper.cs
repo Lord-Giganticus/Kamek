@@ -22,7 +22,7 @@ public class AddressMapper
         }
     }
 
-    private List<Mapping> _mappings = new List<Mapping>();
+    private readonly List<Mapping> _mappings = new();
 
     public void AddMapping(uint start, uint end, int delta)
     {

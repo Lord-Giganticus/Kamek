@@ -103,9 +103,7 @@ namespace Kamek
 
         public uint ReadUInt32(uint address)
         {
-            int sectionID;
-            uint offset;
-            if (!ResolveAddress(address, out sectionID, out offset))
+            if (!ResolveAddress(address, out int sectionID, out uint offset))
                 throw new InvalidOperationException("address out of range in DOL file");
 
             return Util.ExtractUInt32(Sections[sectionID].Data, offset);
@@ -113,9 +111,7 @@ namespace Kamek
 
         public void WriteUInt32(uint address, uint value)
         {
-            int sectionID;
-            uint offset;
-            if (!ResolveAddress(address, out sectionID, out offset))
+            if (!ResolveAddress(address, out int sectionID, out uint offset))
                 throw new InvalidOperationException("address out of range in DOL file");
 
             Util.InjectUInt32(Sections[sectionID].Data, offset, value);
@@ -124,9 +120,7 @@ namespace Kamek
 
         public ushort ReadUInt16(uint address)
         {
-            int sectionID;
-            uint offset;
-            if (!ResolveAddress(address, out sectionID, out offset))
+            if (!ResolveAddress(address, out int sectionID, out uint offset))
                 throw new InvalidOperationException("address out of range in DOL file");
 
             return Util.ExtractUInt16(Sections[sectionID].Data, offset);
@@ -134,9 +128,7 @@ namespace Kamek
 
         public void WriteUInt16(uint address, ushort value)
         {
-            int sectionID;
-            uint offset;
-            if (!ResolveAddress(address, out sectionID, out offset))
+            if (!ResolveAddress(address, out int sectionID, out uint offset))
                 throw new InvalidOperationException("address out of range in DOL file");
 
             Util.InjectUInt16(Sections[sectionID].Data, offset, value);
@@ -145,9 +137,7 @@ namespace Kamek
 
         public byte ReadByte(uint address)
         {
-            int sectionID;
-            uint offset;
-            if (!ResolveAddress(address, out sectionID, out offset))
+            if (!ResolveAddress(address, out int sectionID, out uint offset))
                 throw new InvalidOperationException("address out of range in DOL file");
 
             return Sections[sectionID].Data[offset];
@@ -155,9 +145,7 @@ namespace Kamek
 
         public void WriteByte(uint address, byte value)
         {
-            int sectionID;
-            uint offset;
-            if (!ResolveAddress(address, out sectionID, out offset))
+            if (!ResolveAddress(address, out int sectionID, out uint offset))
                 throw new InvalidOperationException("address out of range in DOL file");
 
             Sections[sectionID].Data[offset] = value;

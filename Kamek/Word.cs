@@ -98,17 +98,13 @@ namespace Kamek
 
         public override string ToString()
         {
-            switch (Type)
+            return Type switch
             {
-                case WordType.AbsoluteAddr:
-                    return string.Format("<AbsoluteAddr 0x{0:X}>", Value);
-                case WordType.RelativeAddr:
-                    return string.Format("<RelativeAddr Base+0x{0:X}>", Value);
-                case WordType.Value:
-                    return string.Format("<Word 0x{0:X}>", Value);
-            }
-
-            throw new NotImplementedException();
+                WordType.AbsoluteAddr => string.Format("<AbsoluteAddr 0x{0:X}>", Value),
+                WordType.RelativeAddr => string.Format("<RelativeAddr Base+0x{0:X}>", Value),
+                WordType.Value => string.Format("<Word 0x{0:X}>", Value),
+                _ => throw new NotImplementedException(),
+            };
         }
     }
 

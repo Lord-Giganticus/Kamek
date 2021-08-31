@@ -11,25 +11,19 @@ namespace Kamek.Hooks
     {
         public static Hook Create(Linker.HookData data, AddressMapper mapper)
         {
-            switch (data.type)
+            return data.type switch
             {
-                case 1:
-                    return new WriteHook(false, data.args, mapper);
-                case 2:
-                    return new WriteHook(true, data.args, mapper);
-                case 3:
-                    return new BranchHook(false, data.args, mapper);
-                case 4:
-                    return new BranchHook(true, data.args, mapper);
-                case 5:
-                    return new PatchExitHook(data.args, mapper);
-                default:
-                    throw new NotImplementedException("unknown command type");
-            }
+                1 => new WriteHook(false, data.args, mapper),
+                2 => new WriteHook(true, data.args, mapper),
+                3 => new BranchHook(false, data.args, mapper),
+                4 => new BranchHook(true, data.args, mapper),
+                5 => new PatchExitHook(data.args, mapper),
+                _ => throw new NotImplementedException("unknown command type"),
+            };
         }
 
 
-        public readonly List<Commands.Command> Commands = new List<Commands.Command>();
+        public readonly List<Commands.Command> Commands = new();
 
         protected Word GetValueArg(Word word)
         {
@@ -53,18 +47,14 @@ namespace Kamek.Hooks
             return word;
         }
 
-        protected Word GetAnyPointerArg(Word word, AddressMapper mapper)
+        protected static Word GetAnyPointerArg(Word word, AddressMapper mapper)
         {
-            switch (word.Type)
+            return word.Type switch
             {
-                case WordType.Value:
-                    return new Word(WordType.AbsoluteAddr, mapper.Remap(word.Value));
-                case WordType.AbsoluteAddr:
-                case WordType.RelativeAddr:
-                    return word;
-                default:
-                    throw new NotImplementedException();
-            }
+                WordType.Value => new Word(WordType.AbsoluteAddr, mapper.Remap(word.Value)),
+                WordType.AbsoluteAddr or WordType.RelativeAddr => word,
+                _ => throw new NotImplementedException(),
+            };
         }
     }
 }

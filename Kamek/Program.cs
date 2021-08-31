@@ -36,37 +36,35 @@ namespace Kamek
                     if (arg == "-dynamic")
                         baseAddress = null;
                     else if (arg.StartsWith("-static=0x"))
-                        baseAddress = uint.Parse(arg.Substring(10), System.Globalization.NumberStyles.HexNumber);
+                        baseAddress = uint.Parse(arg[10..], System.Globalization.NumberStyles.HexNumber);
                     else if (arg.StartsWith("-output-kamek="))
-                        outputKamekPath = arg.Substring(14);
+                        outputKamekPath = arg[14..];
                     else if (arg.StartsWith("-output-riiv="))
-                        outputRiivPath = arg.Substring(13);
+                        outputRiivPath = arg[13..];
                     else if (arg.StartsWith("-output-dolphin="))
-                        outputDolphinPath = arg.Substring(16);
+                        outputDolphinPath = arg[16..];
                     else if (arg.StartsWith("-output-gecko="))
-                        outputGeckoPath = arg.Substring(14);
+                        outputGeckoPath = arg[14..];
                     else if (arg.StartsWith("-output-code="))
-                        outputCodePath = arg.Substring(13);
+                        outputCodePath = arg[13..];
                     else if (arg.StartsWith("-input-dol="))
-                        inputDolPath = arg.Substring(11);
+                        inputDolPath = arg[11..];
                     else if (arg.StartsWith("-output-dol="))
-                        outputDolPath = arg.Substring(12);
+                        outputDolPath = arg[12..];
                     else if (arg.StartsWith("-externals="))
-                        ReadExternals(externals, arg.Substring(11));
+                        ReadExternals(externals, arg[11..]);
                     else if (arg.StartsWith("-versions="))
-                        versions = new VersionInfo(arg.Substring(10));
+                        versions = new VersionInfo(arg[10..]);
                     else if (arg.StartsWith("-select-version="))
-                        selectedVersions.Add(arg.Substring(16));
+                        selectedVersions.Add(arg[16..]);
                     else
                         Console.WriteLine("warning: unrecognised argument: {0}", arg);
                 }
                 else
                 {
                     Console.WriteLine("adding {0} as object..", arg);
-                    using (var stream = new FileStream(arg, FileMode.Open))
-                    {
-                        modules.Add(new Elf(stream));
-                    }
+                    using var stream = new FileStream(arg, FileMode.Open);
+                    modules.Add(new Elf(stream));
                 }
             }
 
@@ -150,10 +148,8 @@ namespace Kamek
                     kf.InjectIntoDol(dol);
 
                     var outpath = outputDolPath.Replace("$KV$", version.Key);
-                    using (var outStream = new FileStream(outpath, FileMode.Create))
-                    {
-                        dol.Write(outStream);
-                    }
+                    using var outStream = new FileStream(outpath, FileMode.Create);
+                    dol.Write(outStream);
                 }
             }
         }

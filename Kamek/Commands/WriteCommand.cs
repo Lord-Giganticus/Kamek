@@ -121,9 +121,9 @@ namespace Kamek.Commands
                 case Type.Value16: return string.Format("0x{0:X8}:word:0x0000{1:X4}", Address.Value, Value.Value);
                 case Type.Value32:
                 case Type.Pointer: return string.Format("0x{0:X8}:dword:0x{1:X8}", Address.Value, Value.Value);
+                default:
+                    return null;
             }
-
-            return null;
         }
 
         public override IEnumerable<ulong> PackGeckoCodes()

@@ -19,9 +19,10 @@ namespace Kamek
 
             public static ElfHeader Read(BinaryReader reader)
             {
-                var h = new ElfHeader();
-
-                h.ei_mag = reader.ReadBigUInt32();
+                var h = new ElfHeader
+                {
+                    ei_mag = reader.ReadBigUInt32()
+                };
                 if (h.ei_mag != 0x7F454C46) // "\x7F" "ELF"
                     throw new InvalidDataException("Incorrect ELF header");
 
@@ -102,12 +103,13 @@ namespace Kamek
 
             public static ElfSection Read(BinaryReader reader)
             {
-                var s = new ElfSection();
-
-                s.sh_name = reader.ReadBigUInt32();
-                s.sh_type = (Type)reader.ReadBigUInt32();
-                s.sh_flags = (Flags)reader.ReadBigUInt32();
-                s.sh_addr = reader.ReadBigUInt32();
+                var s = new ElfSection
+                {
+                    sh_name = reader.ReadBigUInt32(),
+                    sh_type = (Type)reader.ReadBigUInt32(),
+                    sh_flags = (Flags)reader.ReadBigUInt32(),
+                    sh_addr = reader.ReadBigUInt32()
+                };
                 uint sh_offset = reader.ReadBigUInt32();
                 s.sh_size = reader.ReadBigUInt32();
                 s.sh_link = reader.ReadBigUInt32();
@@ -158,8 +160,8 @@ namespace Kamek
         }
 
 
-        private ElfHeader _header;
-        private List<ElfSection> _sections = new List<ElfSection>();
+        private readonly ElfHeader _header;
+        private readonly List<ElfSection> _sections = new();
 
         public IList<ElfSection> Sections { get { return _sections; } }
 

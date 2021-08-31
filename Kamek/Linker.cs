@@ -10,7 +10,7 @@ namespace Kamek
     class Linker
     {
         private bool _linked = false;
-        private List<Elf> _modules = new List<Elf>();
+        private readonly List<Elf> _modules = new();
         public readonly AddressMapper Mapper;
 
         public Linker(AddressMapper mapper)
@@ -74,8 +74,8 @@ namespace Kamek
 
 
         #region Collecting Sections
-        private List<byte[]> _binaryBlobs = new List<byte[]>();
-        private Dictionary<Elf.ElfSection, Word> _sectionBases = new Dictionary<Elf.ElfSection, Word>();
+        private readonly List<byte[]> _binaryBlobs = new();
+        private readonly Dictionary<Elf.ElfSection, Word> _sectionBases = new();
 
         private Word _location;
 
@@ -140,25 +140,12 @@ namespace Kamek
                 position += blob.Length;
             }
         }
+
         #endregion
-
-
         #region Result Binary Manipulation
-        private ushort ReadUInt16(Word addr)
-        {
-            return Util.ExtractUInt16(_memory, addr - _baseAddress);
-        }
         private uint ReadUInt32(Word addr)
         {
             return Util.ExtractUInt32(_memory, addr - _baseAddress);
-        }
-        private void WriteUInt16(Word addr, ushort value)
-        {
-            Util.InjectUInt16(_memory, addr - _baseAddress, value);
-        }
-        private void WriteUInt32(Word addr, uint value)
-        {
-            Util.InjectUInt32(_memory, addr - _baseAddress, value);
         }
         #endregion
 
@@ -230,11 +217,11 @@ namespace Kamek
                 uint st_value = reader.ReadBigUInt32();
                 uint st_size = reader.ReadBigUInt32();
                 byte st_info = reader.ReadByte();
-                byte st_other = reader.ReadByte();
+                _ = reader.ReadByte();
                 ushort st_shndx = reader.ReadBigUInt16();
 
                 Elf.SymBind bind = (Elf.SymBind)(st_info >> 4);
-                Elf.SymType type = (Elf.SymType)(st_info & 0xF);
+                _ = (Elf.SymType)(st_info & 0xF);
 
                 string name = Util.ExtractNullTerminatedString(strtab.data, (int)st_name);
 
@@ -309,9 +296,9 @@ namespace Kamek
             if (_externalSymbols.ContainsKey(name))
                 return new Symbol { address = new Word(WordType.AbsoluteAddr, _externalSymbols[name]) };
             if (name.StartsWith("__kAutoMap_")) {
-                var addr = name.Substring(11);
+                var addr = name[11..];
                 if (addr.StartsWith("0x") || addr.StartsWith("0X"))
-                    addr = addr.Substring(2);
+                    addr = addr[2..];
                 var parsedAddr = uint.Parse(addr, System.Globalization.NumberStyles.AllowHexSpecifier);
                 var mappedAddr = Mapper.Remap(parsedAddr);
                 return new Symbol { address = new Word(WordType.AbsoluteAddr, mappedAddr) };
@@ -328,7 +315,7 @@ namespace Kamek
             public Elf.Reloc type;
             public Word source, dest;
         }
-        private List<Fixup> _fixups = new List<Fixup>();
+        private readonly List<Fixup> _fixups = new();
         public IReadOnlyList<Fixup> Fixups { get { return _fixups; } }
 
         private void ProcessRelocations()
@@ -401,7 +388,7 @@ namespace Kamek
 
 
         #region Kamek Hooks
-        private Dictionary<Word, Word> _kamekRelocations = new Dictionary<Word, Word>();
+        private readonly Dictionary<Word, Word> _kamekRelocations = new();
 
         private bool KamekUseReloc(Elf.Reloc type, Word source, Word dest)
         {
@@ -420,7 +407,7 @@ namespace Kamek
             public Word[] args;
         }
 
-        private List<HookData> _hooks = new List<HookData>();
+        private readonly List<HookData> _hooks = new();
         public IList<HookData> Hooks { get { return _hooks; } }
 
 

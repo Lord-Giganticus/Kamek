@@ -86,7 +86,7 @@ namespace Kamek
 
         public static void DumpToConsole(byte[] array)
         {
-            int lines = array.Length / 16;
+            _ = array.Length / 16;
 
             for (int offset = 0; offset < array.Length; offset += 0x10)
             {
