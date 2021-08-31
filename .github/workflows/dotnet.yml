@@ -31,7 +31,7 @@ jobs:
           
   build-mac:  
     
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v2
@@ -44,9 +44,10 @@ jobs:
         cd Kamek  
         dotnet build /p:Configuration=Release
         cd bin/Release/net5.0
+        7z a "${{ github.workspace }}/Kamek.zip" Kamek Kamek.dll Kamek.runtimeconfig.json
         popd
     - uses: actions/upload-artifact@v2.2.3
       with:
-        name: Mac-Build
+        name: Ubuntu-Build
         path: |
           ${{ github.workspace }}/Kamek/bin/Release/net5.0
