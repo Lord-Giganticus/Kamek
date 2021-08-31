@@ -29,7 +29,7 @@ jobs:
         path: |
           *.zip
           
-  build-mac:  
+  build-ubuntu:  
     
     runs-on: ubuntu-latest
     
@@ -50,4 +50,28 @@ jobs:
       with:
         name: Ubuntu-Build
         path: |
-          ${{ github.workspace }}/Kamek/bin/Release/net5.0
+          *.zip
+          
+  publish:
+    if: github.ref == 'refs/heads/master'
+    needs: [build-win, build-ubuntu]
+    runs-on: windows-latest
+    
+    steps:
+     - uses: actions/checkout@v2
+     - uses: actions/download-artifact@v2.0.10
+       with:
+          name: Win-Build
+          path: ${{ github.workspace }}
+     - uses: actions/download-artifact@v2.0.10
+       with:
+          name: Ubuntu-Build
+          path: ${{ github.workspace }}
+     - uses: "marvinpinto/action-automatic-releases@latest"
+       with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "Auto"
+        prerelease: true
+        title: "Auto Build"
+        files: |
+          *.zip
