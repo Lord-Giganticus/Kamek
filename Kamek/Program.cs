@@ -40,9 +40,9 @@ namespace Kamek
                     else if (arg.StartsWith("-output-kamek="))
                         outputKamekPath = arg[14..];
                     else if (arg.StartsWith("-output-riiv="))
-                        outputRiivPath = arg[13..];
+                        outputRiivPath = arg.Substring(13);
                     else if (arg.StartsWith("-output-dolphin="))
-                        outputDolphinPath = arg[16..];
+                        outputDolphinPath = arg.Substring(16);
                     else if (arg.StartsWith("-output-gecko="))
                         outputGeckoPath = arg[14..];
                     else if (arg.StartsWith("-output-code="))
