@@ -21,6 +21,8 @@ namespace Kamek
         private Word _baseAddress;
         private byte[] _codeBlob;
         private long _bssSize;
+        private long _ctorStart;
+        private long _ctorEnd;
 
         public Word BaseAddress { get { return _baseAddress; } }
         public byte[] CodeBlob { get { return _codeBlob; } }
@@ -72,6 +74,8 @@ namespace Kamek
 
             _baseAddress = linker.BaseAddress;
             _bssSize = linker.BssSize;
+            _ctorStart = linker.CtorStart - linker.OutputStart;
+            _ctorEnd = linker.CtorEnd - linker.OutputStart;
 
             _hooks = new List<Hooks.Hook>();
             _commands = new Dictionary<Word, Commands.Command>();
@@ -81,6 +85,7 @@ namespace Kamek
                 _symbolSizes.Add(pair.Key, pair.Value);
 
             AddRelocsAsCommands(linker.Fixups);
+
             foreach (var cmd in linker.Hooks)
                 ApplyHook(cmd);
             ApplyStaticCommands();
@@ -93,7 +98,10 @@ namespace Kamek
             {
                 if (_commands.ContainsKey(rel.source))
                     throw new InvalidOperationException(string.Format("duplicate commands for address {0}", rel.source));
-                _commands[rel.source] = new Commands.RelocCommand(rel.source, rel.dest, rel.type);
+                Commands.Command cmd = new Commands.RelocCommand(rel.source, rel.dest, rel.type);
+                cmd.CalculateAddress(this);
+                cmd.AssertAddressNonNull();
+                _commands[rel.source] = cmd;
             }
         }
 
@@ -103,9 +111,11 @@ namespace Kamek
             var hook = Hooks.Hook.Create(hookData, _mapper);
             foreach (var cmd in hook.Commands)
             {
-                if (_commands.ContainsKey(cmd.Address))
-                    throw new InvalidOperationException(string.Format("duplicate commands for address {0}", cmd.Address));
-                _commands[cmd.Address] = cmd;
+                cmd.CalculateAddress(this);
+                cmd.AssertAddressNonNull();
+                if (_commands.ContainsKey(cmd.Address.Value))
+                    throw new InvalidOperationException(string.Format("duplicate commands for address {0}", cmd.Address.Value));
+                _commands[cmd.Address.Value] = cmd;
             }
             _hooks.Add(hook);
         }
@@ -119,8 +129,10 @@ namespace Kamek
 
             foreach (var cmd in original.Values)
             {
-                if (!cmd.Apply(this))
-                    _commands[cmd.Address] = cmd;
+                if (!cmd.Apply(this)) {
+                    cmd.AssertAddressNonNull();
+                    _commands[cmd.Address.Value] = cmd;
+                }
             }
         }
 
@@ -140,14 +152,36 @@ namespace Kamek
 
                 foreach (var pair in _commands)
                 {
-                    uint cmdID = (uint)pair.Value.Id << 24;
-                    if (pair.Value.Address.IsRelative)
-                    {
-                        if (pair.Value.Address.Value > 0xFFFFFF)
-                            throw new InvalidOperationException("Address too high for packed command");
+                    bw.WriteBE((uint)0x4B616D65); // 'Kamek\0\0\2'
+                    bw.WriteBE((uint)0x6B000002);
+                    bw.WriteBE((uint)_bssSize);
+                    bw.WriteBE((uint)_codeBlob.Length);
+                    bw.WriteBE((uint)_ctorStart);
+                    bw.WriteBE((uint)_ctorEnd);
+                    bw.WriteBE((uint)0);
+                    bw.WriteBE((uint)0);
 
-                        cmdID |= pair.Value.Address.Value;
-                        bw.WriteBE(cmdID);
+                    bw.Write(_codeBlob);
+
+                    foreach (var pair in _commands)
+                    {
+                        pair.Value.AssertAddressNonNull();
+                        uint cmdID = (uint)pair.Value.Id << 24;
+                        if (pair.Value.Address.Value.IsRelative)
+                        {
+                            if (pair.Value.Address.Value.Value > 0xFFFFFF)
+                                throw new InvalidOperationException("Address too high for packed command");
+
+                            cmdID |= pair.Value.Address.Value.Value;
+                            bw.WriteBE(cmdID);
+                        }
+                        else
+                        {
+                            cmdID |= 0xFFFFFE;
+                            bw.WriteBE(cmdID);
+                            bw.WriteBE(pair.Value.Address.Value.Value);
+                        }
+                        pair.Value.WriteArguments(bw);
                     }
                     else
                     {
