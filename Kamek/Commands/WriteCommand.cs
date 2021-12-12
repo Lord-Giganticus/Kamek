@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Kamek.Commands
+﻿namespace Kamek.Commands
 {
     class WriteCommand : Command
     {
@@ -109,7 +102,7 @@ namespace Kamek.Commands
 
         public override string PackForDolphin()
         {
-            Address.AssertAbsolute();
+            ((Word)Address).AssertAbsolute();
             if (ValueType == Type.Pointer)
                 Value.AssertAbsolute();
             else

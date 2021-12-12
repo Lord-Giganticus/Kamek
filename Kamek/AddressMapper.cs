@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-public class AddressMapper
+﻿public class AddressMapper
 {
     public AddressMapper Base = null;
 

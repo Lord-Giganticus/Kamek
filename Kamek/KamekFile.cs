@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Kamek
+﻿namespace Kamek
 {
     class KamekFile
     {
@@ -141,58 +134,38 @@ namespace Kamek
         public byte[] Pack()
         {
             using var ms = new MemoryStream();
-            using (var bw = new BinaryWriter(ms))
+            using var bw = new BinaryWriter(ms);
+            bw.WriteBE(0x4B616D65); // 'Kamek\0\0\2'
+            bw.WriteBE(0x6B000002);
+            bw.WriteBE((uint)_bssSize);
+            bw.WriteBE((uint)_codeBlob.Length);
+            bw.WriteBE((uint)_ctorStart);
+            bw.WriteBE((uint)_ctorEnd);
+            bw.WriteBE((uint)0);
+            bw.WriteBE((uint)0);
+
+            bw.Write(_codeBlob);
+
+            foreach (var pair in _commands)
             {
-                bw.WriteBE(0x4B616D65); // 'Kamek\0\0\1'
-                bw.WriteBE(0x6B000001);
-                bw.WriteBE((uint)_bssSize);
-                bw.WriteBE((uint)_codeBlob.Length);
-
-                bw.Write(_codeBlob);
-
-                foreach (var pair in _commands)
+                pair.Value.AssertAddressNonNull();
+                uint cmdID = (uint)pair.Value.Id << 24;
+                if (pair.Value.Address.Value.IsRelative)
                 {
-                    bw.WriteBE((uint)0x4B616D65); // 'Kamek\0\0\2'
-                    bw.WriteBE((uint)0x6B000002);
-                    bw.WriteBE((uint)_bssSize);
-                    bw.WriteBE((uint)_codeBlob.Length);
-                    bw.WriteBE((uint)_ctorStart);
-                    bw.WriteBE((uint)_ctorEnd);
-                    bw.WriteBE((uint)0);
-                    bw.WriteBE((uint)0);
+                    if (pair.Value.Address.Value.Value > 0xFFFFFF)
+                        throw new InvalidOperationException("Address too high for packed command");
 
-                    bw.Write(_codeBlob);
-
-                    foreach (var pair in _commands)
-                    {
-                        pair.Value.AssertAddressNonNull();
-                        uint cmdID = (uint)pair.Value.Id << 24;
-                        if (pair.Value.Address.Value.IsRelative)
-                        {
-                            if (pair.Value.Address.Value.Value > 0xFFFFFF)
-                                throw new InvalidOperationException("Address too high for packed command");
-
-                            cmdID |= pair.Value.Address.Value.Value;
-                            bw.WriteBE(cmdID);
-                        }
-                        else
-                        {
-                            cmdID |= 0xFFFFFE;
-                            bw.WriteBE(cmdID);
-                            bw.WriteBE(pair.Value.Address.Value.Value);
-                        }
-                        pair.Value.WriteArguments(bw);
-                    }
-                    else
-                    {
-                        cmdID |= 0xFFFFFE;
-                        bw.WriteBE(cmdID);
-                        bw.WriteBE(pair.Value.Address.Value);
-                    }
-                    pair.Value.WriteArguments(bw);
+                    cmdID |= pair.Value.Address.Value.Value;
+                    bw.WriteBE(cmdID);
                 }
+                else
+                {
+                    cmdID |= 0xFFFFFE;
+                    bw.WriteBE(cmdID);
+                    bw.WriteBE(pair.Value.Address.Value.Value);
+                }
+                pair.Value.WriteArguments(bw);
             }
-
             return ms.ToArray();
         }
 

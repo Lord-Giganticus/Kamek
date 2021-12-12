@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿global using System.Text.RegularExpressions;
 
 namespace Kamek
 {
@@ -40,9 +34,9 @@ namespace Kamek
                     else if (arg.StartsWith("-output-kamek="))
                         outputKamekPath = arg[14..];
                     else if (arg.StartsWith("-output-riiv="))
-                        outputRiivPath = arg.Substring(13);
+                        outputRiivPath = arg[13..];
                     else if (arg.StartsWith("-output-dolphin="))
-                        outputDolphinPath = arg.Substring(16);
+                        outputDolphinPath = arg[16..];
                     else if (arg.StartsWith("-output-gecko="))
                         outputGeckoPath = arg[14..];
                     else if (arg.StartsWith("-output-code="))

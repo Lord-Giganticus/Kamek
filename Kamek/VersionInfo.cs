@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
-
-namespace Kamek
+﻿namespace Kamek
 {
     public class VersionInfo
     {

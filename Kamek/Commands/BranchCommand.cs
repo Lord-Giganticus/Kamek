@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Kamek.Commands
+﻿namespace Kamek.Commands
 {
     class BranchCommand : Command
     {
@@ -33,7 +26,7 @@ namespace Kamek.Commands
 
         public override string PackForDolphin()
         {
-            Address.AssertAbsolute();
+            ((Word)Address).AssertAbsolute();
             Target.AssertAbsolute();
 
             return string.Format("0x{0:X8}:dword:0x{1:X8}", Address.Value, GenerateInstruction());
