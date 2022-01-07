@@ -26,7 +26,7 @@
 
         public override string PackForDolphin()
         {
-            ((Word)Address).AssertAbsolute();
+            Address.Value.AssertAbsolute();
             Target.AssertAbsolute();
 
             return string.Format("0x{0:X8}:dword:0x{1:X8}", Address.Value, GenerateInstruction());
