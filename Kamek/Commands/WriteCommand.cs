@@ -102,7 +102,7 @@
 
         public override string PackForDolphin()
         {
-            ((Word)Address).AssertAbsolute();
+            Address.Value.AssertAbsolute();
             if (ValueType == Type.Pointer)
                 Value.AssertAbsolute();
             else
